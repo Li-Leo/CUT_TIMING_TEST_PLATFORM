@@ -320,6 +320,20 @@ static int app_cmd_read_temp(const char *cmd, char *params[], int param_size)
     celsius = temp * 625.0f / 1000.0f;
     printf("temp:%d.%d\n", celsius / 10, celsius % 10);
 
+	printf("temp:%u\n", ds18b20_read_temp(&thermometer[0]));
+
+    return 0;
+}
+
+static int app_cmd_test_us(const char *cmd, char *params[], int param_size)
+{
+    uint16_t temp = 0;
+    
+	for (int i = 0; i < 20; ++i){
+		ssz_delay_us(1000000);
+    	printf("test:%d\n", temp++);
+	}
+
     return 0;
 }
 
@@ -330,12 +344,13 @@ const static AppCmdInfo g_app_cmd_info[] =
 	{"help", app_cmd_help,"show cmd info"},
 	{"exit", app_cmd_exit,"exit cmd mode"},
 	//{"disable", app_cmd_disable,"disable cmd"},
-	{"repeat", app_cmd_repeat, "repeat last cmd each time, e.g. repeat [time_ms], repeat 2000" },
+	{"repeat", app_cmd_repeat, "repeat last cmd each time, e.g. repeat [time_ms], repeat 2000"},
 	{"enable_output", app_cmd_enable_output, "enable module's output. e.g. enable_output [module_name], enable_output all"
 	 "\n\t\t module_name: common, infusion_monitor, motor\n\t\t motor_monitor, screen"},
-	{"disable_output", app_cmd_disable_output, "disable module's output. e.g. disable_output [module_id], disable_output all" },
-	{"module", app_cmd_module, "show all module output state" },
-	{"temp", app_cmd_read_temp, "read temperature" },
+	{"disable_output", app_cmd_disable_output, "disable module's output. e.g. disable_output [module_id], disable_output all"},
+	{"module", app_cmd_module, "show all module output state"},
+	{"temp", app_cmd_read_temp, "read temperature"},
+	{"test", app_cmd_test_us, "test us delay"},
 	{"test_watchdog", app_cmd_test_watchdog},
 	//output version
 	{"version", app_cmd_version, "show system version" },

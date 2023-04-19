@@ -43,7 +43,7 @@ uint8_t DS18B20_check_ack(const struct dev_port *dev)
 
     set_pin_mode_input(dev);
     while (HAL_GPIO_ReadPin(dev->port, dev->pin) && cnt < 200) {
-        ssz_delay_us(1);
+        ssz_delay_us(4);
         cnt++;
     }
     if (cnt >= 200)
@@ -51,7 +51,7 @@ uint8_t DS18B20_check_ack(const struct dev_port *dev)
 
     cnt = 0;
     while ((!HAL_GPIO_ReadPin(dev->port, dev->pin)) && cnt < 240) {
-        ssz_delay_us(1);
+        ssz_delay_us(4);
         cnt++;
     }
     if (cnt >= 240)
@@ -65,9 +65,9 @@ uint8_t ds18b20_check_device(const struct dev_port *dev) //包含了复位脉冲
 
     set_pin_mode_output(dev);
     HAL_GPIO_WritePin(dev->port, dev->pin, GPIO_PIN_RESET);
-    ssz_delay_us(750);
+    ssz_delay_us(800);
     HAL_GPIO_WritePin(dev->port, dev->pin, GPIO_PIN_SET);
-    ssz_delay_us(15);
+    ssz_delay_us(30);
 
     if (DS18B20_check_ack(dev)) {
         return 1;
@@ -85,7 +85,7 @@ void ds18b20_write_byte(const struct dev_port *dev, uint8_t cmd)
 
     for (i = 0; i < 8; i++) {
         HAL_GPIO_WritePin(dev->port, dev->pin, GPIO_PIN_RESET);
-        ssz_delay_us(2);
+        ssz_delay_us(4);
         HAL_GPIO_WritePin(dev->port, dev->pin, (GPIO_PinState)(cmd & 0x01));
         ssz_delay_us(60); 
         HAL_GPIO_WritePin(dev->port, dev->pin, GPIO_PIN_SET);
@@ -101,11 +101,11 @@ uint8_t ds18b20_read_byte(const struct dev_port *dev)
     for (i = 0; i < 8; i++) {
         set_pin_mode_output(dev);
         HAL_GPIO_WritePin(dev->port, dev->pin, GPIO_PIN_RESET);
-        ssz_delay_us(2);
+        ssz_delay_us(4);
         HAL_GPIO_WritePin(dev->port, dev->pin, GPIO_PIN_SET);
 
         set_pin_mode_input(dev);
-        ssz_delay_us(8);
+        ssz_delay_us(10);
 
         data >>= 1;
         if (HAL_GPIO_ReadPin(dev->port, dev->pin))
@@ -150,6 +150,7 @@ uint16_t ds18b20_read_temp(const struct dev_port *dev)
 
 uint16_t read_channel_temp(enum tmp_channel_t ch)
 {
+    // printf("temp:%u\n", ds18b20_read_temp(&thermometer[0]));
     return ds18b20_read_temp(&thermometer[ch]);
 }
 
