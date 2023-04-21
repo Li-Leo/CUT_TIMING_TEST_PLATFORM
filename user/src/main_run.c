@@ -1,4 +1,5 @@
 
+#include <stdint.h>
 #include "version.h"
 #include "event.h"
 #include "ssz_common.h"
@@ -9,7 +10,8 @@
 #include "key.h"
 #include "main.h"
 #include "app_cmd.h"
-#include <stdint.h>
+#include "i2c.h"
+#include "lcd.h"
 
 
 /************************************************
@@ -25,6 +27,8 @@ int32_t g_total_cutting_counter;
 int32_t g_cutting_time;
 int32_t g_total_cutting_time;
 int32_t g_last_time;
+
+int32_t g_default_time = TEST_TIME_5MINS_MS;
 
 /************************************************
 * Function 
@@ -147,9 +151,9 @@ void beep(uint16_t times)
 }
 
 
-void check_if_reach_5mins(void)
+void check_if_reach_expect_time(void)
 {
-    if (g_cutting_time + ssz_tick_time_elapsed(g_last_time) >= TEST_TIME_5MINS_MS) {
+    if (g_cutting_time + ssz_tick_time_elapsed(g_last_time) >= g_default_time) {
         beep(6);
         HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
         timer_stop(kTimerCheck5min);
@@ -179,8 +183,10 @@ void main_run(void)
     app_cmd_init();
     key_start_scan();
     key_bind();
+    e2prom_read(CUTTING_TIME_ADDR, &g_default_time, sizeof(g_default_time));
+    lcd_init();
 
-    timer_set_handler(kTimerCheck5min, check_if_reach_5mins);
+    timer_set_handler(kTimerCheck5min, check_if_reach_expect_time);
 
     // ssz_traceln("%s power on.", version_software_name());
     printf("%s power on\n%s\n%s\n", version_software_name(), version_str(), version_build_time());

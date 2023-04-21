@@ -43,12 +43,13 @@ void ssz_delay_us(int us)
 }
 
 //delay millisecond
-void ssz_delay_ms(int ms){
+void ssz_delay_ms(int ms)
+{
 	//get current time
 	int32_t curr_ms = ssz_tick_time_now();
 
 	//calc the elapse time is reach the specific time, if reach then stop delay
-	while (ssz_tick_time_elapsed(curr_ms) < ms){
+	while (ssz_tick_time_elapsed(curr_ms) < ms) {
 		ssz_sleep();
 	}
 }
@@ -66,7 +67,7 @@ void ssz_delay_ms_with_clear_watchdog(int ms) {
 
 //sleep
 void ssz_sleep() {
-	// __WFI();
+	__WFI();
 }
 
 #ifdef HAL_GPIO_MODULE_ENABLED11

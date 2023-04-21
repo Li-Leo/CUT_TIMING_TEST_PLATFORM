@@ -638,6 +638,16 @@
               <FileType>1</FileType>
               <FilePath>..\user\src\ssz_str_utility.c</FilePath>
             </File>
+            <File>
+              <FileName>ssz_time_utility.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\src\ssz_time_utility.c</FilePath>
+            </File>
+            <File>
+              <FileName>lcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\user\src\lcd.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

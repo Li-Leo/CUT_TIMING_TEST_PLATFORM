@@ -37,6 +37,7 @@ extern I2C_HandleTypeDef hi2c1;
 extern I2C_HandleTypeDef hi2c2;
 
 /* USER CODE BEGIN Private defines */
+#define CUTTING_TIME_ADDR 0
 
 /* USER CODE END Private defines */
 
@@ -44,7 +45,10 @@ void MX_I2C1_Init(void);
 void MX_I2C2_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+void read_test(int addr, int size);
+void write_test(int addr, int size);
+HAL_StatusTypeDef e2prom_read(int addr, void *pData, int size);
+HAL_StatusTypeDef e2prom_write(uint16_t write_addr, void *p_data, uint32_t size);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

@@ -11,6 +11,7 @@ extern "C" {
 #endif
 
 #define MSECS_PER_TICK 1
+#define SSZ_TIME_STR_FORMAT_WHEN_PRINT 2
 
 void ssz_tick_time_increase(int ms);
 

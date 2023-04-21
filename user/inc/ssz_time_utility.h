@@ -4,6 +4,8 @@
 /************************************************
 * Declaration
 ************************************************/
+#define SSZ_BASE_YEAR 2000  //it support 68 years from base year
+
 typedef enum {
 	kSszTimeFormat12Hour,
 	kSszTimeFormat24Hour,	

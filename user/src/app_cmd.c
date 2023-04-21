@@ -13,13 +13,16 @@
 #include "common.h"
 #include "drv_18b20.h"
 #include "ssz_str_utility.h"
+#include "ssz_time_utility.h"
+#include "i2c.h"
+#include "lcd.h"
 
 /************************************************
 * Declaration
 ************************************************/
 #define CMD_MAX_SIZE_OF_RECEIVE_STR 60
 #define CMD_ID kComPCUart
-#define CMD_HANDLE_ORDER kComHandleSecond
+#define CMD_HANDLE_ORDER kComHandleFirst
 #define CMD_ENABLE_PASSWORD "givemecmd"
 
 typedef  int (*AppCmdHandler)(const char* cmd, char *params[], int param_size);
@@ -74,18 +77,18 @@ static bool g_app_cmd_wait_line_end; //wait \n when receive \r
 static void app_cmd_send_return_flag(int ret_code)
 {
 #ifdef SSZ_TARGET_SIMULATOR
-	fwrite(g_app_cmd_cmd_return_id, 1, sizeof(g_app_cmd_cmd_return_id), stdout);
+    fwrite(g_app_cmd_cmd_return_id, 1, sizeof(g_app_cmd_cmd_return_id), stdout);
 #else
-	ssz_fwrite(com_to_file(CMD_ID), g_app_cmd_cmd_return_id, sizeof(g_app_cmd_cmd_return_id));
+    ssz_fwrite(com_to_file(CMD_ID), g_app_cmd_cmd_return_id, sizeof(g_app_cmd_cmd_return_id));
 #endif
 }
 
 void app_cmd_repeat_exe_cmd(void)
 {
-	char tmp_receive_str[CMD_MAX_SIZE_OF_RECEIVE_STR];
+    char tmp_receive_str[CMD_MAX_SIZE_OF_RECEIVE_STR];
 
-	strcpy(tmp_receive_str, g_app_cmd_last_receive_str);
-	app_cmd_parse_from_str(tmp_receive_str);
+    strcpy(tmp_receive_str, g_app_cmd_last_receive_str);
+    app_cmd_parse_from_str(tmp_receive_str);
 }
 
 // static void app_cmd_output_error_info(int error_code)
@@ -151,14 +154,14 @@ static int app_cmd_exit(const char* cmd, char* params[], int param_size)
 
 static int app_cmd_repeat(const char* cmd, char* params[], int param_size)
 {
-	int time_ms = 0;
+    int time_ms = 0;
 
-	if (param_size > 0) {
-		time_ms = atoi(params[0]);
-	}
-	if (time_ms==0) {
-		time_ms = 1000;
-	}
+    if (param_size > 0) {
+        time_ms = atoi(params[0]);
+    }
+    if (time_ms==0) {
+        time_ms = 1000;
+    }
     timer_start_periodic_every(kTimerRepeatCmd, time_ms);
     app_cmd_repeat_exe_cmd();
     return 0;
@@ -167,25 +170,25 @@ static int app_cmd_repeat(const char* cmd, char* params[], int param_size)
 #ifdef TEST
 static int app_cmd_test(const char* cmd, char* params[], int param_size)
 {
-	run_test_main(param_size, (const char **)params);
-	return 0;
+    run_test_main(param_size, (const char **)params);
+    return 0;
 }
 #endif
 #if STOP_WATCH_MODULE_ENABLE
 static int app_cmd_stop_watch_set(const char* cmd, char* params[], int param_size) {
-	int is_on = 1;
-	if (param_size > 0) {
-		is_on = atoi(params[0]);
-	}
-	if (is_on==0) {
-		printf("disable stopwatch\n");
-		stop_watch_disable();
-	}
-	else {
-		printf("enable stopwatch\n");
-		stop_watch_enable();
-	}
-	return 0;
+    int is_on = 1;
+    if (param_size > 0) {
+        is_on = atoi(params[0]);
+    }
+    if (is_on==0) {
+        printf("disable stopwatch\n");
+        stop_watch_disable();
+    }
+    else {
+        printf("enable stopwatch\n");
+        stop_watch_enable();
+    }
+    return 0;
 }
 #endif
 static void app_cmd_output_all_module_info(void)
@@ -218,7 +221,7 @@ static bool app_cmd_set_module_output_by_name(const char* module_name, bool is_e
             ret = true;
             break;
         } else if(strcmp(module_name,"all") == 0) {
-			set_module_output((ModuleID)i, is_enable);
+            set_module_output((ModuleID)i, is_enable);
             ret = true;
         }
             
@@ -229,9 +232,9 @@ static bool app_cmd_set_module_output_by_name(const char* module_name, bool is_e
 
 static int app_cmd_module(const char* cmd, char* params[], int param_size)
 {
-	app_cmd_output_all_module_info();
+    app_cmd_output_all_module_info();
 
-	return 0;
+    return 0;
 }
 
 static int app_cmd_enable_output(const char* cmd, char* params[], int param_size)
@@ -244,9 +247,9 @@ static int app_cmd_enable_output(const char* cmd, char* params[], int param_size
         {
             printf("%s module set enabled success\n", params[i]);
         }
-		else {
-			printf("unknow module: %s\n", params[i]);
-		}
+        else {
+            printf("unknow module: %s\n", params[i]);
+        }
     }
 
     app_cmd_output_all_module_info();
@@ -264,9 +267,9 @@ static int app_cmd_disable_output(const char* cmd, char* params[], int param_siz
         {
             printf("%s module set disabled success\n", params[i]);
         }
-		else {
-			printf("unkonw module: %s\n", params[i]);
-		}
+        else {
+            printf("unkonw module: %s\n", params[i]);
+        }
     }
     app_cmd_output_all_module_info();
 
@@ -282,26 +285,26 @@ static int app_cmd_test_watchdog(const char* cmd, char* params[], int param_size
 
 static int app_cmd_version(const char* cmd, char* params[], int param_size)
 {
-	printf("%s\n", version_software_name());
-	printf("Master Software Version: %d.%d.%d.%d\n", version_info()->major, version_info()->minor, version_info()->revision,
-		version_info()->internal_version);
+    // printf("%s\n", version_software_name());
+    printf("software version: %d.%d.%d.%d\n", version_info()->major, version_info()->minor, version_info()->revision,
+        version_info()->internal_version);
 
-	printf("Build Time: %s\n", version_build_time());
-	int days;
-	int hour;
-	int minute;
-	int second;
-	int ms;
-	// ms = ssz_milliseconds_to_run_time_of_days(ssz_tick_time_now(), &days, &hour, &minute, &second);
-	printf("Run Time: %d day, %02d:%02d:%02d.%03d\n", days, hour, minute, second, ms);
-	return 0;
+    printf("build time: %s\n", version_build_time());
+    int days;
+    int hour;
+    int minute;
+    int second;
+    int ms;
+    ms = ssz_milliseconds_to_run_time_of_days(ssz_tick_time_now(), &days, &hour, &minute, &second);
+    printf("run time: %d day, %02d:%02d:%02d.%03d\n", days, hour, minute, second, ms);
+    return 0;
 }
 
 #if CPU_USAGE_MODULE_ENABLE
 static int app_cmd_cpu_usage(const char* cmd, char* params[], int param_size)
 {
-	cpu_usage_print_if_large_than(0);
-	return 0;
+    cpu_usage_print_if_large_than(0);
+    return 0;
 }
 #endif
 // static int app_cmd_time(const char* cmd, char* params[], int param_size)
@@ -320,7 +323,7 @@ static int app_cmd_read_temp(const char *cmd, char *params[], int param_size)
     celsius = temp * 625.0f / 1000.0f;
     printf("temp:%d.%d\n", celsius / 10, celsius % 10);
 
-	printf("temp:%u\n", ds18b20_read_temp(&thermometer[0]));
+    printf("temp:%u\n", ds18b20_read_temp(&thermometer[0]));
 
     return 0;
 }
@@ -329,10 +332,101 @@ static int app_cmd_test_us(const char *cmd, char *params[], int param_size)
 {
     uint16_t temp = 0;
     
-	for (int i = 0; i < 20; ++i){
-		ssz_delay_us(1000000);
-    	printf("test:%d\n", temp++);
-	}
+    for (int i = 0; i < 5; ++i){
+        ssz_delay_us(1000000);
+        printf("test_us:%d\n", temp++);
+    }
+    
+    printf("\n");
+    for (int i = 0, temp = 0; i < 5; ++i){
+        ssz_delay_ms(1000);
+        printf("test_ms:%d\n", temp++);
+    }
+
+    return 0;
+}
+
+static int app_cmd_tick(const char *cmd, char *params[], int param_size)
+{
+    printf("tick_time:%s\n", ssz_tick_time_now_str());
+
+    return 0;
+}
+
+
+static int app_cmd_e2prom_read(const char *cmd, char *params[], int param_size)
+{
+    int addr = 0;
+    uint16_t size = 64;
+
+    if (param_size == 2) {
+        addr = ssz_str_hex_to_int(params[0]);
+        size = atoi(params[1]);
+        read_test(addr, size);
+
+    } else {
+        printf("error param\n");
+        return 0;
+    }
+
+    return 0;
+}
+
+static int app_cmd_e2prom_write(const char *cmd, char *params[], int param_size)
+{
+    int addr = 0;
+    uint16_t size = 64;
+
+    if (param_size == 2) {
+        addr = ssz_str_hex_to_int(params[0]);
+        size = atoi(params[1]);
+        write_test(addr, size);
+        printf("write e2prom done\n");
+
+    } else {
+        printf("error param\n");
+        return 0;
+    }
+
+    return 0;
+}
+
+extern int32_t g_default_time;
+static int app_cmd_write_cutting_time(const char *cmd, char *params[], int param_size)
+{
+    g_default_time = atoi(params[0]) * 1000;
+    e2prom_write(CUTTING_TIME_ADDR, &g_default_time, sizeof(g_default_time));
+    printf("write cutting_time:%lds, %ldms\n", g_default_time/1000, g_default_time); 
+
+    return 0;
+}
+
+static int app_cmd_read_cutting_time(const char *cmd, char *params[], int param_size)
+{
+    e2prom_read(CUTTING_TIME_ADDR, &g_default_time, sizeof(g_default_time));
+    printf("read cutting_time:%lds, %ldms\n", g_default_time/1000, g_default_time); 
+
+    return 0;
+}
+
+static int app_cmd_lcd_test(const char *cmd, char *params[], int param_size)
+{
+    // uint8_t dis3[] = "我王境泽就是饿死";
+    // uint8_t dis4[] = "死外边";
+    // uint8_t dis5[] = "也不吃你一口饭!";
+    // uint8_t dis6[] = "艾玛,真香!";
+
+    uint8_t dis1[] = "abcd";
+    uint8_t dis2[] = "12345";
+    uint8_t dis3[] = "hello world!";
+    uint8_t dis4[] = "0123456789";
+
+	lcd_write_msg(dis1, LINE1);
+	lcd_write_msg(dis2, LINE2);
+	lcd_write_msg(dis3, LINE3);
+	lcd_write_msg(dis4, LINE4);
+
+    printf("send to lcd\n");
 
     return 0;
 }
@@ -341,22 +435,28 @@ static int app_cmd_test_us(const char *cmd, char *params[], int param_size)
 //all cmd handlers
 const static AppCmdInfo g_app_cmd_info[] =
 {
-	{"help", app_cmd_help,"show cmd info"},
-	{"exit", app_cmd_exit,"exit cmd mode"},
-	//{"disable", app_cmd_disable,"disable cmd"},
-	{"repeat", app_cmd_repeat, "repeat last cmd each time, e.g. repeat [time_ms], repeat 2000"},
-	{"enable_output", app_cmd_enable_output, "enable module's output. e.g. enable_output [module_name], enable_output all"
-	 "\n\t\t module_name: common, infusion_monitor, motor\n\t\t motor_monitor, screen"},
-	{"disable_output", app_cmd_disable_output, "disable module's output. e.g. disable_output [module_id], disable_output all"},
-	{"module", app_cmd_module, "show all module output state"},
-	{"temp", app_cmd_read_temp, "read temperature"},
-	{"test", app_cmd_test_us, "test us delay"},
-	{"test_watchdog", app_cmd_test_watchdog},
-	//output version
-	{"version", app_cmd_version, "show system version" },
+    {"help", app_cmd_help,"show cmd info"},
+    {"exit", app_cmd_exit,"exit cmd mode"},
+    //{"disable", app_cmd_disable,"disable cmd"},
+    {"repeat", app_cmd_repeat, "repeat last cmd each time, e.g. repeat [time_ms], repeat 2000"},
+    {"enable_output", app_cmd_enable_output, "enable module's output. e.g. enable_output [module_name], enable_output all"
+     "\n\t\t module_name: common, infusion_monitor, motor\n\t\t motor_monitor, screen"},
+    {"disable_output", app_cmd_disable_output, "disable module's output. e.g. disable_output [module_id], disable_output all"},
+    {"module", app_cmd_module, "show all module output state"},
+    {"temp", app_cmd_read_temp, "read temperature"},
+    {"test", app_cmd_test_us, "test us delay"},
+    // {"tick", app_cmd_tick, "print tick"},
+    {"e2prom_read", app_cmd_e2prom_read, "e2prom read test [0xXX] [size]"},
+    {"e2prom_write", app_cmd_e2prom_write, "e2prom write test [0xXX] [size]"},
+    {"read_cut_time", app_cmd_read_cutting_time, "read_cutting_time"},
+    {"write_cut_time", app_cmd_write_cutting_time, "write_cutting_time [s]"},
+    {"lcd", app_cmd_lcd_test, "lcd test"},
+    // {"test_watchdog", app_cmd_test_watchdog},
+    //output version
+    {"ver", app_cmd_version, "show system version" },
 
 
-	//below must at end
+    //below must at end
     {"", NULL}   
 };
 
@@ -466,10 +566,10 @@ static bool app_cmd_handle_special_char(uint8_t ch)
     {
         ret = true;
     }
-	else if (ch == '\n')//return key
-	{
-		ret = true;
-	}
+    else if (ch == '\n')//return key
+    {
+        ret = true;
+    }
     return ret;
 }
 
@@ -490,51 +590,51 @@ static bool app_cmd_on_receive_byte(uint8_t ch, bool is_handled_ok_at_pre_handle
     if (is_handled_ok_at_pre_handler) {
         g_app_cmd_receive_index = 0;
     } else {
-		if (g_app_cmd_wait_line_end && ch == '\n') {
-			g_app_cmd_wait_line_end = false;
-			return true;
-		}
+        if (g_app_cmd_wait_line_end && ch == '\n') {
+            g_app_cmd_wait_line_end = false;
+            return true;
+        }
 
-		g_app_cmd_wait_line_end = false;
-		//stop last cmd repeat run
-		timer_stop(kTimerRepeatCmd);
+        g_app_cmd_wait_line_end = false;
+        //stop last cmd repeat run
+        timer_stop(kTimerRepeatCmd);
 
-		if (ch == '\n' || ch == '\r') {//cmd end char
-			if (ch == '\r') {
-				g_app_cmd_wait_line_end = true;
-			}
+        if (ch == '\n' || ch == '\r') {//cmd end char
+            if (ch == '\r') {
+                g_app_cmd_wait_line_end = true;
+            }
 
-			if (g_app_cmd_is_enable_cmd && g_app_cmd_is_enable_show_input) {
-				printf("\n");
-			}
-			g_app_cmd_receive_str[g_app_cmd_receive_index] = 0;
-			if (strncmp(g_app_cmd_receive_str, "repeat", 6) != 0) {
-				strcpy(g_app_cmd_last_receive_str, g_app_cmd_receive_str);
-			}
-			//parse the cmd
-			if (strlen(g_app_cmd_receive_str) > 0) {
-				app_cmd_parse_from_str(g_app_cmd_receive_str);
-			}
-			//reset the index
-			g_app_cmd_receive_index = 0;
-		} else if (app_cmd_handle_special_char(ch)) {  //is special char
-			//handle special char ok
-		} else {
-			if (g_app_cmd_is_enable_cmd && g_app_cmd_is_enable_show_input) {
-				putchar(ch);
-			}
+            if (g_app_cmd_is_enable_cmd && g_app_cmd_is_enable_show_input) {
+                printf("\n");
+            }
+            g_app_cmd_receive_str[g_app_cmd_receive_index] = 0;
+            if (strncmp(g_app_cmd_receive_str, "repeat", 6) != 0) {
+                strcpy(g_app_cmd_last_receive_str, g_app_cmd_receive_str);
+            }
+            //parse the cmd
+            if (strlen(g_app_cmd_receive_str) > 0) {
+                app_cmd_parse_from_str(g_app_cmd_receive_str);
+            }
+            //reset the index
+            g_app_cmd_receive_index = 0;
+        } else if (app_cmd_handle_special_char(ch)) {  //is special char
+            //handle special char ok
+        } else {
+            if (g_app_cmd_is_enable_cmd && g_app_cmd_is_enable_show_input) {
+                putchar(ch);
+            }
 
-			//receive cmd srt
-			g_app_cmd_receive_str[g_app_cmd_receive_index] = ch;
-			g_app_cmd_receive_index++;
-			if (g_app_cmd_receive_index >= CMD_MAX_SIZE_OF_RECEIVE_STR - 1) {
-				if (g_app_cmd_is_enable_cmd && g_app_cmd_is_enable_show_input) {
-					printf("cmd too long\n");
-				}
-				g_app_cmd_receive_index = 0;
-			}
-		}
-	}
+            //receive cmd srt
+            g_app_cmd_receive_str[g_app_cmd_receive_index] = ch;
+            g_app_cmd_receive_index++;
+            if (g_app_cmd_receive_index >= CMD_MAX_SIZE_OF_RECEIVE_STR - 1) {
+                if (g_app_cmd_is_enable_cmd && g_app_cmd_is_enable_show_input) {
+                    printf("cmd too long\n");
+                }
+                g_app_cmd_receive_index = 0;
+            }
+        }
+    }
     return true;
 }
 
@@ -542,24 +642,24 @@ static bool app_cmd_on_receive_byte(uint8_t ch, bool is_handled_ok_at_pre_handle
 //enable cmd receive
 void app_cmd_enable_receive(void)
 {
-	//handle the receive char
+    //handle the receive char
     com_set_receive_handler(CMD_ID, CMD_HANDLE_ORDER, app_cmd_on_receive_byte);
 }
 //disable cmd receive
 void app_cmd_disable_receive(void)
 {
-	com_set_receive_handler(CMD_ID, CMD_HANDLE_ORDER, NULL);	
+    com_set_receive_handler(CMD_ID, CMD_HANDLE_ORDER, NULL);	
 }
 
 //enable cmd respond
 void app_cmd_enable_respond(void)
 {
-	g_app_cmd_is_enable_cmd = true;
+    g_app_cmd_is_enable_cmd = true;
 }
 //disable cmd respond except the password
 void app_cmd_disable_respond(void)
 {
-	g_app_cmd_is_enable_cmd = false;
+    g_app_cmd_is_enable_cmd = false;
 }
 
 
@@ -576,7 +676,7 @@ void app_cmd_init(void)
     g_app_cmd_info_ptr = g_app_cmd_info;
     timer_set_handler(kTimerRepeatCmd, app_cmd_repeat_exe_cmd);
 
-	app_cmd_enable_receive();
+    app_cmd_enable_receive();
 
 #ifdef DEBUG
     g_app_cmd_is_enable_cmd = true;

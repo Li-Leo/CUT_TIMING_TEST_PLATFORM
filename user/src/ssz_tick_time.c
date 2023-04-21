@@ -1,5 +1,6 @@
 #include "ssz_tick_time.h"
 #include "stdio.h"
+#include "ssz_time_utility.h"
 
 /************************************************
 * Declaration
