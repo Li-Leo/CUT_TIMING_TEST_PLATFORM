@@ -3293,7 +3293,7 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-      2196        818        861         12        120      17974   app_cmd.o
+      2196        818        861         12        120      17818   app_cmd.o
        228         68          0          4         12       3308   com.o
         44         16         58         40          0       1884   common.o
        496          6         16          0          0       5507   drv_18b20.o
@@ -3335,7 +3335,7 @@ Image component sizes
         44         28         68          0          0       2458   version.o
 
     ----------------------------------------------------------------------
-     16498       2984       1612        156       2620     423401   Object Totals
+     16498       2984       1612        156       2620     423245   Object Totals
          0          0         32          0          0          0   (incl. Generated)
         40          0         10          0          0          0   (incl. Padding)
 
@@ -3432,8 +3432,8 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     20572       3144       2008        156       2716     416061   Grand Totals
-     20572       3144       2008        156       2716     416061   ELF Image Totals
+     20572       3144       2008        156       2716     415905   Grand Totals
+     20572       3144       2008        156       2716     415905   ELF Image Totals
      20572       3144       2008        156          0          0   ROM Totals
 
 ==============================================================================

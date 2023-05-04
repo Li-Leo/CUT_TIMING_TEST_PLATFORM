@@ -4,9 +4,9 @@
 #include <stdint.h>
 #include "main.h"
 
-#define RS(data)  HAL_GPIO_WritePin(LCD_RS_GPIO_Port, LCD_RS_Pin, data)  // 0:cmd 1:data
-#define RW(data)  HAL_GPIO_WritePin(LCD_RW_GPIO_Port, LCD_RW_Pin, data)  // 0:write 1:read
-#define EN(data)  HAL_GPIO_WritePin(LCD_EN_GPIO_Port, LCD_EN_Pin, data)  // enable
+#define RS(data)  HAL_GPIO_WritePin(LCD_RS_GPIO_Port, LCD_RS_Pin, (GPIO_PinState)data)  // 0:cmd 1:data
+#define RW(data)  HAL_GPIO_WritePin(LCD_RW_GPIO_Port, LCD_RW_Pin, (GPIO_PinState)data)  // 0:write 1:read
+#define EN(data)  HAL_GPIO_WritePin(LCD_EN_GPIO_Port, LCD_EN_Pin, (GPIO_PinState)data)  // enable
 
 #define LINE1   0x80 //第一行起始地址，下同
 #define LINE2   0x90

@@ -277,11 +277,11 @@ static int app_cmd_disable_output(const char* cmd, char* params[], int param_siz
 }
 
 
-static int app_cmd_test_watchdog(const char* cmd, char* params[], int param_size)
-{
-    ssz_check(0); //lint !e506
-    return 0;
-}
+// static int app_cmd_test_watchdog(const char* cmd, char* params[], int param_size)
+// {
+//     ssz_check(0); //lint !e506
+//     return 0;
+// }
 
 static int app_cmd_version(const char* cmd, char* params[], int param_size)
 {
@@ -346,12 +346,12 @@ static int app_cmd_test_us(const char *cmd, char *params[], int param_size)
     return 0;
 }
 
-static int app_cmd_tick(const char *cmd, char *params[], int param_size)
-{
-    printf("tick_time:%s\n", ssz_tick_time_now_str());
+// static int app_cmd_tick(const char *cmd, char *params[], int param_size)
+// {
+//     printf("tick_time:%s\n", ssz_tick_time_now_str());
 
-    return 0;
-}
+//     return 0;
+// }
 
 
 static int app_cmd_e2prom_read(const char *cmd, char *params[], int param_size)

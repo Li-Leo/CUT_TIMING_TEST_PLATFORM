@@ -1,6 +1,6 @@
 #include "lcd.h"
 
-void ssz_ssz_delay_ms(int ms);
+void ssz_delay_ms(int ms);
 
 void lcd_data_port_init_ouput(void)
 {
