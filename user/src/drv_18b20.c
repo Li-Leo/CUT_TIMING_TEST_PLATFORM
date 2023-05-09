@@ -124,16 +124,16 @@ uint16_t ds18b20_read_temp(const struct dev_port *dev)
 {
     uint16_t temp = 0;
     uint8_t temp_H = 0, temp_L = 0;
-    uint32_t tickstart = 0U;
+    uint32_t tick_start = 0U;
 
     ds18b20_check_device(dev);
     ds18b20_write_byte(dev, 0xCC);
     ds18b20_write_byte(dev, 0x44);
 
-    tickstart = HAL_GetTick();
+    tick_start = HAL_GetTick();
     // wait conversion completed
     while (1) {
-        if (ds18b20_read_byte(dev) == 0xFF || (HAL_GetTick() - tickstart) > 200)
+        if (ds18b20_read_byte(dev) == 0xFF || (HAL_GetTick() - tick_start) > 200)
             break;
     }
 

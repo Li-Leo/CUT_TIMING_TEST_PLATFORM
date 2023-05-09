@@ -13,7 +13,7 @@ struct dev_port
 
 enum tmp_channel_t
 {
-    kChannel1,
+    kChannel1,  // wire_1
     kChannel2,
 
     kChannelMax

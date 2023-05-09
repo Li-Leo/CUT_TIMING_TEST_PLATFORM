@@ -1,5 +1,6 @@
 
 #include <stdint.h>
+#include "main_run.h"
 #include "version.h"
 #include "event.h"
 #include "ssz_common.h"
@@ -49,8 +50,8 @@ static void main_init_event_handler()
 static void key_on_pressed(KeyID key, int repeat_count)
 {
     g_last_time = ssz_tick_time_now();
-    timer_start_periodic_every(kTimerCheck5min, 20);
-
+    timer_start_periodic_every(kTimerCheck5min, 5);
+    led_on();
     // printf("key pressed\n");
 }
 
@@ -59,6 +60,7 @@ static void key_on_released(KeyID key, int repeat_count)
     int32_t time_ms;
 
     timer_stop(kTimerCheck5min);
+    led_off();
 
     time_ms = ssz_tick_time_elapsed(g_last_time);
     g_total_cutting_counter++;
@@ -67,6 +69,8 @@ static void key_on_released(KeyID key, int repeat_count)
 
     printf("\nkey released, time:%ldms\ncurrent_time:%ldms, total_time:%ldms\ncutting counter:%ld\n",
         time_ms, g_cutting_time, g_total_cutting_time, g_total_cutting_counter);
+
+    lcd_display_data(g_cutting_time, g_total_cutting_counter, g_total_cutting_time);
 }
 
 
@@ -74,10 +78,12 @@ static void reset_key_on_pressed(KeyID key, int repeat_count)
 {
     g_total_cutting_counter = 0;
     g_cutting_time = 0;
-    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+    beep(1);
 
     printf("\ncurrent_time:%ldms, total_time:%ldms\ncutting counter:%ld\n",
         g_cutting_time, g_total_cutting_time, g_total_cutting_counter);
+    
+    lcd_display_data(g_cutting_time, g_total_cutting_counter, g_total_cutting_time);
 }
 
 
@@ -126,6 +132,28 @@ void buzzer_off(void)
 }
 
 
+void cut_delay_on(void)
+{
+  HAL_GPIO_WritePin(CUT_DELAY_GPIO_Port, CUT_DELAY_Pin, GPIO_PIN_SET);
+}
+
+void cut_delay_off(void)
+{
+  HAL_GPIO_WritePin(CUT_DELAY_GPIO_Port, CUT_DELAY_Pin, GPIO_PIN_RESET);
+}
+
+
+void led_on(void)
+{
+    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+}
+
+void led_off(void)
+{
+    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+}
+
+
 uint16_t g_alarm_count;
 uint16_t g_alarm_beep_times;
 
@@ -134,7 +162,7 @@ void beep_callback(void)
     if (g_alarm_count < g_alarm_beep_times) {
         buzzer_on();
         timer_set_handler(kTimerBuzzerOff, buzzer_off);
-        timer_start_oneshot_after(kTimerBuzzerOff, 250);
+        timer_start_oneshot_after(kTimerBuzzerOff, 300);
         g_alarm_count++;
     } else {
       timer_stop(kTimerBeep);
@@ -147,15 +175,14 @@ void beep(uint16_t times)
     g_alarm_beep_times = times;
     beep_callback();
     timer_set_handler(kTimerBeep, beep_callback);
-    timer_start_periodic_every(kTimerBeep, 500);
+    timer_start_periodic_every(kTimerBeep, 600);
 }
 
 
 void check_if_reach_expect_time(void)
 {
     if (g_cutting_time + ssz_tick_time_elapsed(g_last_time) >= g_default_time) {
-        beep(6);
-        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+        beep(3);
         timer_stop(kTimerCheck5min);
     }
 }
@@ -185,6 +212,7 @@ void main_run(void)
     key_bind();
     e2prom_read(CUTTING_TIME_ADDR, &g_default_time, sizeof(g_default_time));
     lcd_init();
+    beep(1);
 
     timer_set_handler(kTimerCheck5min, check_if_reach_expect_time);
 

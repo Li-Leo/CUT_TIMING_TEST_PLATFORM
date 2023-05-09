@@ -411,26 +411,64 @@ static int app_cmd_read_cutting_time(const char *cmd, char *params[], int param_
 
 static int app_cmd_lcd_test(const char *cmd, char *params[], int param_size)
 {
-    // uint8_t dis3[] = "我王境泽就是饿死";
-    // uint8_t dis4[] = "死外边";
-    // uint8_t dis5[] = "也不吃你一口饭!";
-    // uint8_t dis6[] = "艾玛,真香!";
 
     uint8_t dis1[] = "abcd";
     uint8_t dis2[] = "12345";
     uint8_t dis3[] = "hello world!";
     uint8_t dis4[] = "0123456789";
 
-	lcd_write_msg(dis1, LINE1);
-	lcd_write_msg(dis2, LINE2);
-	lcd_write_msg(dis3, LINE3);
-	lcd_write_msg(dis4, LINE4);
+	lcd_write_msg(1, 0, dis1);
+	lcd_write_msg(2, 0, dis2);
+	lcd_write_msg(3, 0, dis3);
+	lcd_write_msg(4, 0, dis4);
 
     printf("send to lcd\n");
 
     return 0;
 }
 
+static int app_cmd_lcd_cmd(const char *cmd, char *params[], int param_size)
+{
+    uint8_t data;
+
+    data = ssz_str_hex_to_int(params[0]);
+    
+    lcd_write_cmd(data);
+    printf("cmd = 0x%02x\n", data);
+    return 0;
+}
+
+
+static int app_cmd_lcd_str(const char *cmd, char *params[], int param_size)
+{
+    uint8_t r, c;
+    char *str;
+
+    r = atoi(params[0]);
+    c = ssz_str_hex_to_int(params[1]);
+    str = params[2];
+    
+    lcd_write_msg(r, c, (uint8_t *)str);
+
+    return 0;
+}
+
+
+static int app_cmd_led1(const char *cmd, char *params[], int param_size)
+{
+    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+    printf("led high\n");
+
+    return 0;
+}
+
+static int app_cmd_led0(const char *cmd, char *params[], int param_size)
+{
+    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+    printf("led low\n");
+    
+    return 0;
+}
 
 //all cmd handlers
 const static AppCmdInfo g_app_cmd_info[] =
@@ -451,6 +489,10 @@ const static AppCmdInfo g_app_cmd_info[] =
     {"read_cut_time", app_cmd_read_cutting_time, "read_cutting_time"},
     {"write_cut_time", app_cmd_write_cutting_time, "write_cutting_time [s]"},
     {"lcd", app_cmd_lcd_test, "lcd test"},
+    {"cmd", app_cmd_lcd_cmd, "lcd test"},
+    {"display", app_cmd_lcd_str, "row col string"},
+    {"led1", app_cmd_led1, "led"},
+    {"led0", app_cmd_led0, "led"},
     // {"test_watchdog", app_cmd_test_watchdog},
     //output version
     {"ver", app_cmd_version, "show system version" },
