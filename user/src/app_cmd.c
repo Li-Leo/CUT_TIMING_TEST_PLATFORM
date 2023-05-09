@@ -412,15 +412,15 @@ static int app_cmd_read_cutting_time(const char *cmd, char *params[], int param_
 static int app_cmd_lcd_test(const char *cmd, char *params[], int param_size)
 {
 
-    uint8_t dis1[] = "abcd";
-    uint8_t dis2[] = "12345";
-    uint8_t dis3[] = "hello world!";
-    uint8_t dis4[] = "0123456789";
+    uint8_t line_1[] = "abcd";
+    uint8_t line_2[] = "12345";
+    uint8_t line_3[] = "hello world!";
+    uint8_t line_4[] = "0123456789";
 
-	lcd_write_msg(1, 0, dis1);
-	lcd_write_msg(2, 0, dis2);
-	lcd_write_msg(3, 0, dis3);
-	lcd_write_msg(4, 0, dis4);
+	lcd_write_msg(1, 0, line_1);
+	lcd_write_msg(2, 0, line_2);
+	lcd_write_msg(3, 0, line_3);
+	lcd_write_msg(4, 0, line_4);
 
     printf("send to lcd\n");
 
