@@ -7,9 +7,9 @@
 #define SUPPORT_BOOTLOADER 0
 
 #define MAJOR_VERSION   1
-#define MINOR_VERSION   0
-#define REVISION_VERSION   0
-#define INTERNAL_VERSION 0
+#define MINOR_VERSION   1
+#define REVISION_VERSION   1
+#define INTERNAL_VERSION 5
 
 
 #ifdef __ICCARM__
@@ -47,12 +47,16 @@ void slaver_version_info_set(Version *slaver_version) {
 	g_slaver_version.internal_version = slaver_version->internal_version;
 }
 
-const Version* version_info(void) {
+const Version* version_info(void)
+{
 	return &g_version_info;
 }
-const char* version_software_name(void) {
+
+const char* version_software_name(void)
+{
 	return SOFTWARE_NAME;
 }
+
 const char* version_build_time(void)
 {
     return g_version_build_time;

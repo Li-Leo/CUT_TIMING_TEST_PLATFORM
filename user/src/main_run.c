@@ -227,7 +227,6 @@ void main_run(void)
     cpu_usage_reset_usage();
 #endif
 
-
     while(1) {
         //handle all
         if (main_handle_all() == false) {
