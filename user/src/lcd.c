@@ -39,28 +39,18 @@ void lcd_init()
     ssz_delay_us(200);
     lcd_write_cmd(0x01);
     ssz_delay_us(20000);
-    // lcd_write_cmd(0x02);
-    // ssz_delay_us(100);
     lcd_write_cmd(0x06);
     ssz_delay_us(100);
-    // lcd_write_cmd(0x01); // 清除显示
 
-    uint8_t dis1[] = WORK_TIME_STR;
-    uint8_t dis2[] = CUTTING_TIMES_STR;
-    uint8_t dis3[] = TOTAL_TIME_STR;
-    uint8_t dis4[] = "";
+    uint8_t line_1[] = WORK_TIME_STR;
+    uint8_t line_2[] = CUTTING_TIMES_STR;
+    uint8_t line_3[] = TOTAL_TIME_STR;
+    uint8_t line_4[] = "";
 
-    // uint8_t dis1[] = "abcd";
-    // uint8_t dis2[] = "12345";
-    // uint8_t dis3[] = "hello world!";
-    // uint8_t dis4[] = "0123456789";
-
-	lcd_write_msg(1, 0, dis1);
-	lcd_write_msg(2, 0, dis2);
-	lcd_write_msg(3, 0, dis3);
-	lcd_write_msg(4, 0, dis4);
-
-    printf("lcd init done\n");
+	lcd_write_msg(1, 0, line_1);
+	lcd_write_msg(2, 0, line_2);
+	lcd_write_msg(3, 0, line_3);
+	lcd_write_msg(4, 0, line_4);
 }
 
 
@@ -122,11 +112,20 @@ void lcd_write_data(uint8_t data)
 void lcd_set_cursor(uint8_t row, uint8_t column)
 {
     switch(row) {
-        case 1: lcd_write_cmd(0x80 | column); break;
-        case 2: lcd_write_cmd(0x90 | column); break;
-        case 3: lcd_write_cmd(0x88 | column); break;
-        case 4: lcd_write_cmd(0x98 | column); break;
-        default: break;
+    case 1:
+        lcd_write_cmd(0x80 | column);
+        break;
+    case 2:
+        lcd_write_cmd(0x90 | column);
+        break;
+    case 3:
+        lcd_write_cmd(0x88 | column);
+        break;
+    case 4:
+        lcd_write_cmd(0x98 | column);
+        break;
+    default:
+        break;
     }
 }
 
