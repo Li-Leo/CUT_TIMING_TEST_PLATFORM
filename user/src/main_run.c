@@ -78,7 +78,7 @@ static void reset_key_on_pressed(KeyID key, int repeat_count)
 {
     g_total_cutting_counter = 0;
     g_cutting_time = 0;
-    beep(1);
+    // beep(1);
 
     printf("\ncurrent_time:%ldms, total_time:%ldms\ncutting counter:%ld\n",
         g_cutting_time, g_total_cutting_time, g_total_cutting_counter);
@@ -201,6 +201,7 @@ void main_run(void)
     //init all modules
     // init_all();
     //init event handler
+    uint32_t flag;
 
     drv_com_init();
     com_init_by_file(kComPCUart, drv_com_file(kComPCUart));
@@ -210,9 +211,17 @@ void main_run(void)
     app_cmd_init();
     key_start_scan();
     key_bind();
+
+    e2prom_read(8, &flag, sizeof(flag));
+    if (flag != 0xa55a) {
+        flag = 0xa55a;
+        e2prom_write(8, &flag, sizeof(flag));
+        e2prom_write(CUTTING_TIME_ADDR, &g_default_time, sizeof(g_default_time));
+    }
+
     e2prom_read(CUTTING_TIME_ADDR, &g_default_time, sizeof(g_default_time));
     lcd_init();
-    beep(1);
+    // beep(1);
 
     timer_set_handler(kTimerCheck5min, check_if_reach_expect_time);
 

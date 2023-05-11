@@ -42,10 +42,10 @@ void lcd_init()
     lcd_write_cmd(0x06);
     ssz_delay_us(100);
 
-    uint8_t line_1[] = WORK_TIME_STR;
-    uint8_t line_2[] = CUTTING_TIMES_STR;
-    uint8_t line_3[] = TOTAL_TIME_STR;
-    uint8_t line_4[] = "";
+    uint8_t *line_1 = WORK_TIME_STR;
+    uint8_t *line_2 = CUTTING_TIMES_STR;
+    uint8_t *line_3 = TOTAL_TIME_STR;
+    uint8_t *line_4 = "";
 
 	lcd_write_msg(1, 0, line_1);
 	lcd_write_msg(2, 0, line_2);
@@ -130,7 +130,7 @@ void lcd_set_cursor(uint8_t row, uint8_t column)
 }
 
 
-void lcd_write_msg(uint8_t row, uint8_t column, uint8_t *message)
+void lcd_write_msg(uint8_t row, uint8_t column, const uint8_t *message)
 {
     // lcd_write_cmd(address);
     lcd_set_cursor(row, column);
@@ -155,7 +155,8 @@ void lcd_display_data(int32_t time, int32_t cutting_counter, int32_t total_time)
     lcd_write_msg(2, 5, (uint8_t *)msg);
 
     memset(msg, 0, sizeof(msg));
-    sprintf(msg, "%02d:%02d:%02d", total_time / 1000 / 3600 % 100, total_time / 1000 / 60, total_time / 1000 % 60);
+    total_time /= 1000;
+    sprintf(msg, "%02d:%02d:%02d", total_time / 3600 % 100, total_time % 3600 / 60, total_time % 60);
     lcd_write_msg(3, 4, (uint8_t *)msg);
 }
 
