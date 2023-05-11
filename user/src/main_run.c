@@ -178,10 +178,18 @@ void beep(uint16_t times)
     timer_start_periodic_every(kTimerBeep, 600);
 }
 
-
+int32_t g_last_check_time;
 void check_if_reach_expect_time(void)
 {
-    if (g_cutting_time + ssz_tick_time_elapsed(g_last_time) >= g_default_time) {
+    int32_t tmp_time;
+
+    tmp_time = g_cutting_time + ssz_tick_time_elapsed(g_last_time);
+    if (g_last_check_time != tmp_time / 1000 ) {
+        lcd_display_data(g_cutting_time + ssz_tick_time_elapsed(g_last_time), g_total_cutting_counter, g_total_cutting_time + ssz_tick_time_elapsed(g_last_time));
+        g_last_check_time = tmp_time / 1000;
+    }
+
+    if (tmp_time >= g_default_time) {
         beep(3);
         timer_stop(kTimerCheck5min);
     }

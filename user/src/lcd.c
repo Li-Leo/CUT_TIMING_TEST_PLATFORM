@@ -84,9 +84,9 @@ void lcd_write_cmd(uint8_t cmd)
     lcd_check_busy();
     RS(0);
     RW(0);
-    ssz_delay_us(10);
+    // ssz_delay_us(10);
     EN(1);
-    ssz_delay_us(10);
+    // ssz_delay_us(20);
     tmp = (GPIOB->ODR & 0xff00) | cmd;
     GPIOB->ODR = tmp;
     EN(0);
@@ -100,11 +100,11 @@ void lcd_write_data(uint8_t data)
     lcd_check_busy();
     RS(1);
     RW(0);
-    ssz_delay_us(5);
+    // ssz_delay_us(10);
     tmp = (GPIOB->ODR & 0xff00) | data;
     GPIOB->ODR = tmp;
     EN(1);
-    ssz_delay_us(10);
+    // ssz_delay_us(20);
     EN(0);
 }
 
